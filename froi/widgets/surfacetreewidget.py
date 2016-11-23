@@ -7,6 +7,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 from froi.core.dataobject import Hemisphere
+from froi.core.subject import subject
 from treemodel import TreeModel
 from froi.utils import *
 from froi.core.labelconfig import LabelConfig
@@ -75,7 +76,7 @@ class SurfaceTreeView(QWidget):
         #-- Surface display settings panel
         # initialize Surface display settings widgets
         # TODO: to be refactorred
-        surface_name_label = QLabel('Hemisphere name:')
+        surface_name_label = QLabel('Hemisphere:')
         self._surface_name = QLineEdit()
         surface_colormap_label = QLabel('Colormap:')
         self._surface_colormap = QComboBox()
@@ -222,6 +223,25 @@ class SurfaceTreeView(QWidget):
             # Set current index
             self._model.setCurrentIndex(self._tree_view.currentIndex())
 
+            # Set surf type button state
+            for item in self._model._data:
+                if 'white' in item.surf:
+                    self._white_button.setEnabled(True)
+                else:
+                    self._white_button.setEnabled(False)
+                if 'pial' in item.surf:
+                    self._pial_button.setEnabled(True)
+                else:
+                    self._pial_button.setEnabled(False)
+                if 'inflated' in item.surf:
+                    self._inflated_button.setEnabled(True)
+                else:
+                    self._inflated_button.setEnabled(False)
+                if 'flatted' in item.surf:
+                    self._flatted_button.setEnabled(True)
+                else:
+                    self._flatted_button.setEnabled(False)
+
     def _set_view_min(self):
         """Set current selected item's view_min value."""
         index = self._tree_view.currentIndex()
@@ -359,26 +379,9 @@ if __name__ == '__main__':
     hemisphere_list = []
     sub1 = os.path.join(db_dir, 'surf', 'lh.white')
     surf2 = os.path.join(db_dir, 'surf', 'rh.white')
-    s1 = os.path.join(db_dir, 'surf', 'white')
-    s2 = os.path.join(db_dir, 'surf', 'pial')
-    s3 = os.path.join(db_dir, 'surf', 'rh.thickness')
-    s4 = os.path.join(db_dir, 'surf', 'rh.curv')
 
-    h1 = Hemisphere(sub1)
-    h1.add_surfs(sub1, 'white')
-    h1.load_overlays(s1, 'white')
-    h1.load_overlays(s2, 'pial')
-    h2 = Hemisphere(surf2)
-    h2.load_overlay(s3)
-    h2.load_overlay(s4)
-
-    hemisphere_list.append(h1)
-    hemisphere_list.append(h2)
-
-    for h in hemisphere_list:
-        print h.name
-        for ol in h.overlay_list:
-            print ol.name
+    h1 = subject(sub1)
+    hemisphere_list.append(h1.hemi['lh'])
 
     model = TreeModel(hemisphere_list)
 
