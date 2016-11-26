@@ -11,6 +11,7 @@ from mayavi import mlab
 import numpy as np
 
 from treemodel import TreeModel
+from treelistmodel import TreeListModel
 
 
 # Helpers
@@ -199,11 +200,11 @@ class SurfaceView(QWidget):
     # -----------------------------------------------------------------
     def set_model(self, surface_model):
 
-        if isinstance(surface_model, TreeModel):
+        if isinstance(surface_model, TreeListModel):
             self.surface_model = surface_model
             self._create_connections()
         else:
-            raise ValueError("The model must be the instance of the TreeModel!")
+            raise ValueError("The model must be the instance of the TreeListModel!")
 
 
 if __name__ == "__main__":

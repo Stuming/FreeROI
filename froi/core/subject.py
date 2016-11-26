@@ -34,12 +34,14 @@ class subject(object):
 
         """
         self.hemi = {}
+        self.surf_type = []
         if not os.path.exists(surf_path):
             print 'surf file does not exist!'
             return None
         self.surf_path = surf_path
         (self.surf_dir, surf_name) = os.path.split(surf_path)
         self.hemi_type = surf_name.split('.')[0]
+        self.surf_type.append(surf_name.split('.')[1])
         self.hemi[self.hemi_type] = Hemisphere(surf_path)
         self.offset = offset
 
@@ -61,19 +63,13 @@ class subject(object):
             print "Wrong hemisphere!"
 
     def is_hemi(self, hemi_type):
-        if hemi_type == 'left' or hemi_type == 'right':
+        if hemi_type == 'lh' or hemi_type == 'rh':
             return True
         else:
             return False
 
-    def get_suffix(self, surf_path):
-        '''path_list = os.path.split(surf_path)
-        path_surfname = os.path.splitext(path_list[1])
-        self.name = path_surfname[0]
-        self.suffix = path_surfname[1][1:]
-        print path_list
-        print self.suffix'''
-        pass
+    def get_suffix(self):
+        return self.surf_type
 
 
 if __name__ == '__main__':
@@ -84,3 +80,5 @@ if __name__ == '__main__':
     subject1 = subject(sub1)
 
     print subject1.hemi
+    print subject1.is_hemi('lh')
+    print subject1.surf_type
