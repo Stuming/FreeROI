@@ -48,6 +48,28 @@ class SurfaceTreeView(QWidget):
         # initialize QTreeView
         self._tree_view = QTreeView()
 
+        # initialize visibility controller
+        visibility_label = QLabel('Visibility')
+        self._visibility = QSlider(Qt.Horizontal)
+        self._visibility.setMinimum(0)
+        self._visibility.setMaximum(100)
+        self._visibility.setSingleStep(5)
+        visibility_layout = QHBoxLayout()
+        visibility_layout.addWidget(visibility_label)
+        visibility_layout.addWidget(self._visibility)
+
+        # initialize hemi option push button
+        self._left_hemi_button = QPushButton('left')
+        self._right_hemi_button = QPushButton('right')
+        self._both_hemi_button = QPushButton('both')
+
+        hemi_layout = QHBoxLayout()
+        hemi_layout.addWidget(self._left_hemi_button)
+        hemi_layout.addWidget(self._right_hemi_button)
+        hemi_layout.addWidget(self._both_hemi_button)
+        hemi_group_box = QGroupBox('Hemisphere option')
+        hemi_group_box.setLayout(hemi_layout)
+
         # initialize surface option push button
         self._white_button = QPushButton('white')
         self._pial_button = QPushButton('pial')
@@ -63,21 +85,9 @@ class SurfaceTreeView(QWidget):
         surface_type_group_box = QGroupBox('Surface type option')
         surface_type_group_box.setLayout(surface_type_layout)
 
-        # initialize visibility controller
-        visibility_label = QLabel('Visibility')
-        self._visibility = QSlider(Qt.Horizontal)
-        self._visibility.setMinimum(0)
-        self._visibility.setMaximum(100)
-        self._visibility.setSingleStep(5)
-        visibility_layout = QHBoxLayout()
-        visibility_layout.addWidget(visibility_label)
-        visibility_layout.addWidget(self._visibility)
-
         #-- Surface display settings panel
         # initialize Surface display settings widgets
         # TODO: to be refactorred
-        surface_name_label = QLabel('Hemisphere:')
-        self._surface_name = QLineEdit()
         surface_colormap_label = QLabel('Colormap:')
         self._surface_colormap = QComboBox()
         colormaps = self.builtin_colormap
@@ -85,11 +95,9 @@ class SurfaceTreeView(QWidget):
 
         # layout for Surface settings
         surface_layout = QGridLayout()
-        surface_layout.addWidget(surface_name_label, 0, 0)
-        surface_layout.addWidget(self._surface_name, 0, 1)
         surface_layout.addWidget(surface_colormap_label, 1, 0)
         surface_layout.addWidget(self._surface_colormap, 1, 1)
-        surface_group_box = QGroupBox('Surface display settings')
+        surface_group_box = QGroupBox('Surface colormap settings')
         surface_group_box.setLayout(surface_layout)
 
         #-- Overlay display settings panel
@@ -130,8 +138,9 @@ class SurfaceTreeView(QWidget):
         #-- layout config for whole TreeWidget
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self._tree_view)
-        self.layout().addWidget(surface_type_group_box)
         self.layout().addLayout(visibility_layout)
+        self.layout().addWidget(hemi_group_box)
+        self.layout().addWidget(surface_type_group_box)
         self.layout().addWidget(surface_group_box)
         self.layout().addWidget(scalar_group_box)
 
@@ -179,6 +188,9 @@ class SurfaceTreeView(QWidget):
         self._pial_button.clicked.connect(self._pial_action)
         self._inflated_button.clicked.connect(self._inflated_action)
         self._flatted_button.clicked.connect(self._flatted_action)
+        self._left_hemi_button.clicked.connect(self._left_hemi_action)
+        self._right_hemi_button.clicked.connect(self._right_hemi_action)
+        self._both_hemi_button.clicked.connect(self._both_hemi_action)
 
         self._rightclick_add = self.contextMenu.addAction(u'Add')
         self._rightclick_edit = self.contextMenu.addAction(u'Edit')
@@ -224,23 +236,7 @@ class SurfaceTreeView(QWidget):
             self._model.setCurrentIndex(self._tree_view.currentIndex())
 
             # Set surf type button state
-            for item in self._model._data:
-                if 'white' in item.surf:
-                    self._white_button.setEnabled(True)
-                else:
-                    self._white_button.setEnabled(False)
-                if 'pial' in item.surf:
-                    self._pial_button.setEnabled(True)
-                else:
-                    self._pial_button.setEnabled(False)
-                if 'inflated' in item.surf:
-                    self._inflated_button.setEnabled(True)
-                else:
-                    self._inflated_button.setEnabled(False)
-                if 'flatted' in item.surf:
-                    self._flatted_button.setEnabled(True)
-                else:
-                    self._flatted_button.setEnabled(False)
+            self._set_button_state()
 
     def _set_view_min(self):
         """Set current selected item's view_min value."""
@@ -310,6 +306,18 @@ class SurfaceTreeView(QWidget):
         if not index == -1:
             self._disp_current_para(index)
 
+    def _left_hemi_action(self):
+        """Show left hemisphere."""
+        pass
+
+    def _right_hemi_action(self):
+        """Show right hemisphere."""
+        pass
+
+    def _both_hemi_action(self):
+        """Show both hemispheres."""
+        pass
+
     def _get_surface_index(self, surf_type):
         """Check different type of surface exist or not."""
         for index in self._tree_view.selectedIndexes():
@@ -335,6 +343,26 @@ class SurfaceTreeView(QWidget):
         print index.row()
         self._model.removeRow(index.row(), parent)
         self._disp_current_para()
+
+    def _set_button_state(self):
+        """Set surf type button state, based on surf type"""
+        for item in self._model._data:
+            if 'white' in item.surf:
+                self._white_button.setEnabled(True)
+            else:
+                self._white_button.setEnabled(False)
+            if 'pial' in item.surf:
+                self._pial_button.setEnabled(True)
+            else:
+                self._pial_button.setEnabled(False)
+            if 'inflated' in item.surf:
+                self._inflated_button.setEnabled(True)
+            else:
+                self._inflated_button.setEnabled(False)
+            if 'flatted' in item.surf:
+                self._flatted_button.setEnabled(True)
+            else:
+                self._flatted_button.setEnabled(False)
 
     # def _add_item(self, source):
     #     index = self._tree_view.currentIndex()
