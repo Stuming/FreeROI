@@ -34,42 +34,62 @@ class subject(object):
 
         """
         self.hemi = {}
-        self.surf_type = []
-        if not os.path.exists(surf_path):
-            print 'surf file does not exist!'
-            return None
+        self.hemi_type = []
+        self.surfs_type = []
+        self.add_hemi(surf_path)
+
+    def __add_hemi(self, surf_path, offset=None):
+        """Add hemi data and related info."""
         self.surf_path = surf_path
-        (self.surf_dir, surf_name) = os.path.split(surf_path)
-        self.hemi_type = surf_name.split('.')[0]
-        self.surf_type.append(surf_name.split('.')[1])
-        self.hemi[self.hemi_type] = Hemisphere(surf_path)
+        (self.surf_dir, self.surf_name) = os.path.split(surf_path)
+        current_hemi_type = self.surf_name.split('.')[0]
+        current_surf_type = self.surf_name.split('.')[-1]
+        self.hemi_type.append(current_hemi_type)
+        self.surfs_type.append(current_surf_type)
         self.offset = offset
 
-        self.name = surf_name  # Should be modified.
+        self.hemi[current_hemi_type] = Hemisphere(surf_path)  # Here should add surf_type
 
-    def __add_hemi(self, surf_path, hemi_type):
-        self.hemi[hemi_type] = Hemisphere(surf_path)  # Here should add surf_type
+    def add_hemi(self, surf_path):
+        """Judge whether 'surf_path' is a valid data path."""
+        if not os.path.exists(surf_path):
+            print 'Surf file does not exist!'
+            return None
 
-    def add_hemi(self, surf_path, hemi_type):
+        (surf_dir, surf_name) = os.path.split(surf_path)
+        hemi_type = surf_name.split('.')[0]
         if self.is_hemi(hemi_type):
-            self.__add_hemi(surf_path, hemi_type)
+            self.__add_hemi(surf_path)
         else:
             print "Wrong hemisphere!"
 
     def del_hemi(self, hemi_type):
-        if self.is_hemi(hemi_type):  # To do: consider about KeyError
+        """Delete hemisphere data."""
+        if self.exist_hemi(hemi_type):
+            self.hemi_type.remove(hemi_type)
+            # To do: think about KeyError
             del self.hemi[hemi_type]
         else:
             print "Wrong hemisphere!"
 
+    def del_surf(self, hemi_type, surf_type):
+        """Delete surface data."""
+        self.surfs_type.remove(surf_type)
+        self.hemi[hemi_type].del_surfs(surf_type)
+
     def is_hemi(self, hemi_type):
+        """Judge whether 'hemi_type' is a valid hemi type."""
         if hemi_type == 'lh' or hemi_type == 'rh':
             return True
         else:
             return False
 
-    def get_suffix(self):
-        return self.surf_type
+    def exist_hemi(self, hemi_type):
+        """Judge whether 'hemi_type' in 'self.hemi_type'."""
+        if hemi_type in self.hemi_type:
+            return True
+        else:
+            return False
 
 
 if __name__ == '__main__':
@@ -77,8 +97,13 @@ if __name__ == '__main__':
 
     db_dir = froi_utils.get_data_dir()
     sub1 = os.path.join(db_dir, 'surf', 'lh.white')
+    sub2 = os.path.join(db_dir, 'surf', 'rh.white')
     subject1 = subject(sub1)
 
     print subject1.hemi
-    print subject1.is_hemi('lh')
-    print subject1.surf_type
+    print subject1.exist_hemi('lh')
+    subject1.add_hemi(sub2)
+    print subject1.hemi
+    subject1.del_hemi('lh')
+    print subject1.hemi
+    print subject1.exist_hemi('lh')
