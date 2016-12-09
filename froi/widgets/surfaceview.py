@@ -12,7 +12,6 @@ from scipy.spatial.distance import cdist
 import numpy as np
 
 from treemodel import TreeModel
-from treelistmodel import TreeListModel
 
 
 # Helpers
@@ -94,7 +93,7 @@ class SurfaceView(QWidget):
         render the overlays
         """
 
-        hemisphere_list = self.surface_model.get_data()
+        subject_list = self.surface_model.get_data()
 
         # clear the old surface
         if self.surf is not None:
@@ -107,10 +106,13 @@ class SurfaceView(QWidget):
         self.rgba_lut = None
         vertex_number = 0
 
-        for hemisphere in hemisphere_list:
+        # TODO To be modified.
+        subject = subject_list[0]
+        for hemi_type in subject.hemisphere_type:
+            hemisphere = subject.hemisphere[hemi_type]
             if hemisphere.is_visible():
                 # get geometry's information
-                geo = hemisphere.surf['white']  # 'white' should be replaced with var: surf_type
+                geo = hemisphere.surf[hemisphere.surface_type[0]]  # should use var: surf_type
                 hemi_coords = geo.get_coords()
                 hemi_faces = geo.get_faces()
                 hemi_nn = geo.get_nn()
@@ -202,7 +204,7 @@ class SurfaceView(QWidget):
     # -----------------------------------------------------------------
     def set_model(self, surface_model):
 
-        if isinstance(surface_model, TreeListModel):
+        if isinstance(surface_model, TreeModel):
             self.surface_model = surface_model
             self._create_connections()
         else:

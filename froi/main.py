@@ -47,7 +47,6 @@ from widgets.meants import MeanTSDialog
 from widgets.voxelstatsdialog import VoxelStatsDialog
 from widgets.registervolume import RegisterVolumeDialog
 from widgets.treemodel import TreeModel
-from widgets.treelistmodel import TreeListModel
 from widgets.surfacetreewidget import SurfaceTreeView
 from widgets.surfaceview import SurfaceView
 
@@ -751,7 +750,7 @@ class BpMainWindow(QMainWindow):
         """ Add surface image."""
         # If model is NULL, then re-initialize it.
         if not self.surface_model:
-            self.surface_model = TreeListModel([])
+            self.surface_model = TreeModel([])
             self.surface_tree_view = SurfaceTreeView(self.surface_model)
             self.surface_tree_view_control = self.surface_tree_view.get_treeview()
 

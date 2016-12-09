@@ -7,7 +7,7 @@
 
 from PyQt4.QtCore import *
 from froi.core.dataobject import Hemisphere
-
+from froi.core.subject import Subject
 
 class TreeModel(QAbstractItemModel):
     """Definition of class TreeModel."""
@@ -49,19 +49,20 @@ class TreeModel(QAbstractItemModel):
         if not index.isValid():
             return QModelIndex()
 
-        item = index.internalPointer()
-        if item in self._data:
+        subject = index.internalPointer()
+        item = subject.hemisphere[subject.hemisphere_type[0]]
+        if subject in self._data:
             return QModelIndex()
         else:
             for hemi in self._data:
-                if item in hemi.overlay_list:
+                if item in hemi.hemisphere[subject.hemisphere_type[0]].overlay_list:
                     return self.createIndex(self._data.index(hemi), 0, hemi)
 
     def rowCount(self, parent):
         """Return the number of rows for display."""
         if parent.isValid():
             if parent.internalPointer() in self._data:
-                return self._data[parent.row()].overlay_count()
+                return self._data[parent.row()].hemisphere[self._data[parent.row()].hemisphere_type[0]].overlay_count()
             else:
                 return 0
         else:
@@ -76,9 +77,10 @@ class TreeModel(QAbstractItemModel):
         if not index.isValid():
             return None
 
-        item = index.internalPointer()
+        subject = index.internalPointer()
+        item = subject.hemisphere[subject.hemisphere_type[0]]
 
-        if item in self._data:
+        if subject in self._data:
             if role == Qt.UserRole + 2:
                 return item.get_alpha()
             elif role == Qt.UserRole + 3:
@@ -94,7 +96,7 @@ class TreeModel(QAbstractItemModel):
                 return item.get_colormap()
 
         if role == Qt.DisplayRole or role == Qt.EditRole:
-           return item.get_name()
+           return subject.get_name()
 
         if role == Qt.CheckStateRole:
 
@@ -110,10 +112,11 @@ class TreeModel(QAbstractItemModel):
             return Qt.NoItemFlags
         
         result = Qt.ItemIsSelectable | Qt.ItemIsUserCheckable
-        item = index.internalPointer()
-        if not item in self._data:
+        subject = index.internalPointer()
+        item = subject.hemisphere[subject.hemisphere_type[0]]
+        if not subject in self._data:
             for hemi in self._data:
-                if item in hemi.overlay_list:
+                if item in hemi.hemisphere[subject.hemisphere_type[0]].overlay_list:
                     break
             if hemi.is_visible():
                 result |= Qt.ItemIsEnabled
@@ -131,7 +134,8 @@ class TreeModel(QAbstractItemModel):
         if not index.isValid():
             return None
 
-        item = index.internalPointer()
+        subject = index.internalPointer()
+        item = subject.hemisphere[subject.hemisphere_type[0]]
         if role == Qt.EditRole:
             value_str = value.toPyObject()
             if not value_str == '':
@@ -147,7 +151,7 @@ class TreeModel(QAbstractItemModel):
             else:
                 item.set_visible(True)
 
-        if item in self._data:
+        if subject in self._data:
             if role == Qt.UserRole + 2:
                 if not item.get_alpha == value:
                     item.set_alpha(value)
@@ -194,10 +198,11 @@ class TreeModel(QAbstractItemModel):
 
     def removeRow(self, row, parent):
         self.beginRemoveRows(parent, row, row)
-        item = self.index(row, 0, parent).internalPointer()
+        subject = self.index(row, 0, parent).internalPointer()
+        item = subject.hemisphere[subject.hemisphere_type[0]]
         parent_item = parent.internalPointer()
-        if item in self._data:
-            self._data.remove(item)
+        if subject in self._data:
+            self._data.remove(subject)
         else:
             idx = parent_item.overlay_list.index(item)
             parent_item.overlay_list.pop(item)
@@ -206,7 +211,8 @@ class TreeModel(QAbstractItemModel):
         return True
 
     def moveUp(self, index):
-        item = index.internalPointer()
+        subject = index.internalPointer()
+        item = subject.hemisphere[subject.hemisphere_type[0]]
         row = index.row()
         parent = index.parent()
         self.beginMoveRows(parent, row, row, parent, row-1)
@@ -218,7 +224,8 @@ class TreeModel(QAbstractItemModel):
         self.repaint_surface.emit()
 
     def moveDown(self, index):
-        item = index.internalPointer()
+        subject = index.internalPointer()
+        item = subject.hemisphere[subject.hemisphere_type[0]]
         row = index.row()
         parent = index.parent()
         self.beginMoveRows(parent, row+1, row+1, parent, row)
@@ -241,21 +248,23 @@ class TreeModel(QAbstractItemModel):
         if not index.isValid():
             return Qt.NoItemFlags
         
-        item = index.internalPointer()
-        if item in self._data:
+        subject = index.internalPointer()
+        item = subject.hemisphere[subject.hemisphere_type[0]]
+        # TODO To be modified.
+        if subject in self._data:
             return True
         else:
             return False
 
     def _add_item(self, index, source):
         if not index.isValid():
-            add_item = Hemisphere(source)
+            add_item = Subject(source)
             ok = self.insertRow(index.row(), add_item, index)
 
         else:
             parent = index.parent()
             if not parent.isValid():
-                add_item = Hemisphere(source)
+                add_item = Subject(source)
             else:
                 parent_item = parent.internalPointer()
                 parent_item.load_overlay(source)

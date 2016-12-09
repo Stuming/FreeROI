@@ -7,7 +7,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 from froi.core.dataobject import Hemisphere
-from froi.core.subject import subject
+from froi.core.subject import Subject
 from treemodel import TreeModel
 from froi.utils import *
 from froi.core.labelconfig import LabelConfig
@@ -24,6 +24,8 @@ class SurfaceTreeView(QWidget):
                         "PuBu", "PuBuGn", "Purples",
                         "YlGn", "black-white", "blue-red",
                         "bone", "gray"]
+    buildin_surf_list = ["White", "Pial", "Inflated", "Flatted"]
+    buildin_hemi_list = ["Left", "Right", "Both"]
 
     def __init__(self, model, parent=None):
         """TreeView initialization."""
@@ -58,32 +60,20 @@ class SurfaceTreeView(QWidget):
         visibility_layout.addWidget(visibility_label)
         visibility_layout.addWidget(self._visibility)
 
-        # initialize hemi option push button
-        self._left_hemi_button = QPushButton('left')
-        self._right_hemi_button = QPushButton('right')
-        self._both_hemi_button = QPushButton('both')
+        # ComboBox for surface and hemisphere type option
+        self._hemi_type = QComboBox()
+        hemi_type = self.buildin_hemi_list
+        self._hemi_type.addItems(hemi_type)
+        self._surf_type = QComboBox()
+        surf_type = self.buildin_surf_list
+        self._surf_type.addItems(surf_type)
 
-        hemi_layout = QHBoxLayout()
-        hemi_layout.addWidget(self._left_hemi_button)
-        hemi_layout.addWidget(self._right_hemi_button)
-        hemi_layout.addWidget(self._both_hemi_button)
-        hemi_group_box = QGroupBox('Hemisphere option')
-        hemi_group_box.setLayout(hemi_layout)
-
-        # initialize surface option push button
-        self._white_button = QPushButton('white')
-        self._pial_button = QPushButton('pial')
-        self._inflated_button = QPushButton('inflated')
-        self._flatted_button = QPushButton('flatted')
-
-        # self._surface_button.setIconSize(surface_button_size)
-        surface_type_layout = QHBoxLayout()
-        surface_type_layout.addWidget(self._white_button)
-        surface_type_layout.addWidget(self._pial_button)
-        surface_type_layout.addWidget(self._inflated_button)
-        surface_type_layout.addWidget(self._flatted_button)
-        surface_type_group_box = QGroupBox('Surface type option')
-        surface_type_group_box.setLayout(surface_type_layout)
+        # layout for Surface settings
+        type_option_layout = QGridLayout()
+        type_option_layout.addWidget(self._hemi_type, 1, 0)
+        type_option_layout.addWidget(self._surf_type, 1, 1)
+        type_option_group_box = QGroupBox('Type option')
+        type_option_group_box.setLayout(type_option_layout)
 
         #-- Surface display settings panel
         # initialize Surface display settings widgets
@@ -139,8 +129,7 @@ class SurfaceTreeView(QWidget):
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self._tree_view)
         self.layout().addLayout(visibility_layout)
-        self.layout().addWidget(hemi_group_box)
-        self.layout().addWidget(surface_type_group_box)
+        self.layout().addWidget(type_option_group_box)
         self.layout().addWidget(surface_group_box)
         self.layout().addWidget(scalar_group_box)
 
@@ -181,16 +170,11 @@ class SurfaceTreeView(QWidget):
         self._view_min.editingFinished.connect(self._set_view_min)
         self._view_max.editingFinished.connect(self._set_view_max)
         self._scalar_colormap.currentIndexChanged.connect(self._set_colormap)
+        self._hemi_type.currentIndexChanged.connect(self._set_current_hemi)
+        self._surf_type.currentIndexChanged.connect(self._set_current_surf)
         self._visibility.sliderReleased.connect(self._set_alpha)
         self._up_button.clicked.connect(self._up_action)
         self._down_button.clicked.connect(self._down_action)
-        self._white_button.clicked.connect(self._white_action)
-        self._pial_button.clicked.connect(self._pial_action)
-        self._inflated_button.clicked.connect(self._inflated_action)
-        self._flatted_button.clicked.connect(self._flatted_action)
-        self._left_hemi_button.clicked.connect(self._left_hemi_action)
-        self._right_hemi_button.clicked.connect(self._right_hemi_action)
-        self._both_hemi_button.clicked.connect(self._both_hemi_action)
 
         self._rightclick_add = self.contextMenu.addAction(u'Add')
         self._rightclick_edit = self.contextMenu.addAction(u'Edit')
@@ -235,9 +219,6 @@ class SurfaceTreeView(QWidget):
             # Set current index
             self._model.setCurrentIndex(self._tree_view.currentIndex())
 
-            # Set surf type button state
-            self._set_button_state()
-
     def _set_view_min(self):
         """Set current selected item's view_min value."""
         index = self._tree_view.currentIndex()
@@ -262,6 +243,14 @@ class SurfaceTreeView(QWidget):
         value = self._scalar_colormap.currentText()
         self._model.setData(index, value, role=Qt.UserRole + 3)
 
+    def _set_current_hemi(self):
+        """Set current hemisphere for display."""
+        pass
+
+    def _set_current_surf(self):
+        """Set current surf for display."""
+        pass
+
     def _set_alpha(self):
         """Set alpha value of current selected item."""
         index = self._tree_view.currentIndex()
@@ -279,44 +268,6 @@ class SurfaceTreeView(QWidget):
         index = self._tree_view.currentIndex()
         self._model.moveDown(index)
         self._tree_view.setFocus()
-
-    def _white_action(self):
-        """Show white surface."""
-        # index = self._tree_view.currentIndex()
-        # max_index = self._model.rowCount(index.parent()) - 1
-        index = self._get_surface_index('white')
-        if not index == -1:
-            self._disp_current_para(index)
-
-    def _pial_action(self):
-        """Show pial surface."""
-        index = self._get_surface_index('pial')
-        if not index == -1:
-            self._disp_current_para(index)
-
-    def _inflated_action(self):
-        """Show inflated surface."""
-        index = self._get_surface_index('inflated')
-        if not index == -1:
-            self._disp_current_para(index)
-
-    def _flatted_action(self):
-        """Show flatted surface."""
-        index = self._get_surface_index('flatted')
-        if not index == -1:
-            self._disp_current_para(index)
-
-    def _left_hemi_action(self):
-        """Show left hemisphere."""
-        pass
-
-    def _right_hemi_action(self):
-        """Show right hemisphere."""
-        pass
-
-    def _both_hemi_action(self):
-        """Show both hemispheres."""
-        pass
 
     def _get_surface_index(self, surf_type):
         """Check different type of surface exist or not."""

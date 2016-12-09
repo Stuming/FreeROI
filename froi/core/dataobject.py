@@ -796,10 +796,12 @@ class Hemisphere(object):
 
         """
         # self.surf = SurfaceDataset(surf_path, offset)
-        surf_type = 'white'
         self.surf = {}
+        self.surface_type = []
+        surf_name = surf_path.split('/')[-1]
+        surf_type = surf_path.split('.')[-1]
         self.add_surfs(surf_path, surf_type)
-        self.name = self.surf[surf_type].name
+        self.name = surf_name.split('.')[0]
         self.overlay_list = []
         self.overlay_idx = []
         self.alpha = 1.0
@@ -808,35 +810,31 @@ class Hemisphere(object):
 
     def _add_surface(self, surf_path, surf_type, offset=None):
         """Add surface data"""
+        self.surface_type.append(surf_type)
         self.surf[surf_type] = SurfaceDataset(surf_path, offset)
 
     def del_surfs(self, surf_type):
         """Del surface data"""
-        try:
-            self.surf[surf_type]
-        except KeyError:
-            print "The surface data is not exist!"
-        else:
+        if surf_type in self.surf:
+            self.surface_type.remove(surf_type)
             del self.surf[surf_type]
+        else:
+            print "The surface data is not exist!"
 
     def add_surfs(self, surf_path, surf_type, offset=None):
-        """Add surf data"""
-        try:
-            self.surf[surf_type]
-        except KeyError:
-            self._add_surface(surf_path, surf_type, offset)
-        else:
+        """Check surface type"""
+        if surf_type in self.surf:
             print "The surface data is already exist!"
+        else:
+            self._add_surface(surf_path, surf_type, offset)
 
     def update_surfs(self, surf_path, surf_type, offset=None):
         """Update surf data, if not exist, ask user to confirm"""
-        try:
-            self.surf[surf_type]
-        except KeyError:
-            pass
-            # Here should be a dialog for confirm, whether adding data or not
-        else:
+        if surf_type in self.surf:
             self._add_surface(surf_path, surf_type, offset)
+        else:
+            pass
+            # TODO Here should be a dialog, add data or not.
 
     def load_overlay(self, data_file, surf_type):
         """Load scalar data as an overlay."""
