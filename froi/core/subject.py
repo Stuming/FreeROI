@@ -49,7 +49,7 @@ class Subject(object):
             self.hemisphere_type.append(current_hemi_type)
 
         # TODO Here should add surf_type
-        self.hemisphere[current_hemi_type] = Hemisphere(surf_path,)
+        self.hemisphere[current_hemi_type] = Hemisphere(surf_path)
 
     def add_hemisphere(self, surf_path):
         """Check whether 'surf_path' is a valid data path."""
