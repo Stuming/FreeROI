@@ -958,6 +958,9 @@ class Hemisphere(object):
     def get_colormap(self):
         return self.colormap
 
+    def get_surface_type(self):
+        return self.surface_type
+
     def is_visible(self):
         return self.visible
 

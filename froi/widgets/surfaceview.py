@@ -113,11 +113,19 @@ class SurfaceView(QWidget):
 
         # TODO To be modified.
         subject = subject_list[0]
-        for hemi_type in subject.hemisphere_type:
+        hemisphere_index = self.surface_model.get_current_hemi_index()
+
+        if hemisphere_index == 'both':
+            hemisphere_list = ['lh', 'rh']
+        else:
+            hemisphere_list = [hemisphere_index]
+
+        for hemi_type in hemisphere_list:
             hemisphere = subject.hemisphere[hemi_type]
             if hemisphere.is_visible():
                 # get geometry's information
-                geo = hemisphere.surf[hemisphere.surface_type[0]]  # should use var: surf_type
+                surface_index = self.surface_model.get_current_surf_index()  # hemisphere.surface_type[0]
+                geo = hemisphere.surf[surface_index]  # should use var: surf_type
                 hemi_coords = geo.get_coords()
                 hemi_faces = geo.get_faces()
                 hemi_nn = geo.get_nn()

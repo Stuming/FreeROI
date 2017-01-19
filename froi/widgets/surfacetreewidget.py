@@ -45,6 +45,9 @@ class SurfaceTreeView(QWidget):
 
         self._create_action()
 
+        self._set_combobox_hemi()
+        self._set_combobox_surf()
+
     def _init_gui(self):
         """Initialize a GUI designation."""
         # initialize QTreeView
@@ -62,10 +65,10 @@ class SurfaceTreeView(QWidget):
 
         # ComboBox for surface and hemisphere type option
         self._hemi_type = QComboBox()
-        hemi_type = self.buildin_hemi_list
+        hemi_type = []  # self.buildin_hemi_list
         self._hemi_type.addItems(hemi_type)
         self._surf_type = QComboBox()
-        surf_type = self.buildin_surf_list
+        surf_type = []  # self.buildin_surf_list
         self._surf_type.addItems(surf_type)
 
         # layout for Surface settings
@@ -139,7 +142,7 @@ class SurfaceTreeView(QWidget):
         self.contextMenu = QMenu(self)
 
     def showContextMenu(self):
-        '''Show right click context menu'''
+        """Show right click context menu."""
         self.contextMenu.move(QCursor.pos())
         self.contextMenu.show()
 
@@ -219,6 +222,9 @@ class SurfaceTreeView(QWidget):
             # Set current index
             self._model.setCurrentIndex(self._tree_view.currentIndex())
 
+            self._set_combobox_hemi()
+            self._set_combobox_surf()
+
     def _set_view_min(self):
         """Set current selected item's view_min value."""
         index = self._tree_view.currentIndex()
@@ -243,13 +249,55 @@ class SurfaceTreeView(QWidget):
         value = self._scalar_colormap.currentText()
         self._model.setData(index, value, role=Qt.UserRole + 3)
 
+    def _set_combobox_hemi(self):
+        """Set qcombobox hemisphere list."""
+        subject = self._model.get_current_subject()
+        # TODO
+        if subject:
+            hemi_list = subject.hemisphere_type
+            self._hemi_type.clear()
+            self._hemi_type.addItems(hemi_list)
+            self._set_current_hemi()
+        else:
+            return
+
+        '''
+        AllItems = [self._hemi_type.itemText(i) for i in range(self._hemi_type.count())]
+        for item in hemi_list:
+            if item not in AllItems:
+                self._hemi_type.addItem(item)
+        '''
+
     def _set_current_hemi(self):
         """Set current hemisphere for display."""
-        pass
+        current_hemi_index = self._hemi_type.currentText().encode("ascii", 'ignore')
+        self._model.setCurrentHemiIndex(current_hemi_index)
+        return
+
+    def _set_combobox_surf(self):
+        """Set qcombobox surface list."""
+        subject = self._model.get_current_subject()
+        # TODO
+        if subject:
+            surf_list = subject.hemisphere[self._model.get_current_hemi_index()].get_surface_type()
+            self._surf_type.clear()
+            self._surf_type.addItems(surf_list)
+            self._set_current_surf()
+        else:
+            return
+
+        '''
+        AllItems = [self._surf_type.itemText(i) for i in range(self._surf_type.count())]
+        for item in surf_list:
+            if item not in AllItems:
+                self._surf_type.addItem(item)
+        '''
 
     def _set_current_surf(self):
         """Set current surf for display."""
-        pass
+        current_surf_index = self._surf_type.currentText().encode("ascii", 'ignore')
+        self._model.setCurrentSurfIndex(current_surf_index)
+        return
 
     def _set_alpha(self):
         """Set alpha value of current selected item."""
@@ -295,25 +343,6 @@ class SurfaceTreeView(QWidget):
         self._model.removeRow(index.row(), parent)
         self._disp_current_para()
 
-    def _set_button_state(self):
-        """Set surf type button state, based on surf type"""
-        for item in self._model._data:
-            if 'white' in item.surf:
-                self._white_button.setEnabled(True)
-            else:
-                self._white_button.setEnabled(False)
-            if 'pial' in item.surf:
-                self._pial_button.setEnabled(True)
-            else:
-                self._pial_button.setEnabled(False)
-            if 'inflated' in item.surf:
-                self._inflated_button.setEnabled(True)
-            else:
-                self._inflated_button.setEnabled(False)
-            if 'flatted' in item.surf:
-                self._flatted_button.setEnabled(True)
-            else:
-                self._flatted_button.setEnabled(False)
 
     # def _add_item(self, source):
     #     index = self._tree_view.currentIndex()

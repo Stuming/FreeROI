@@ -19,6 +19,9 @@ class TreeModel(QAbstractItemModel):
         super(TreeModel, self).__init__(parent)
         self._data = hemisphere_list
 
+        self._current_hemi_index = None
+        self._current_surf_index = None
+
     def get_data(self):
         return self._data
 
@@ -116,10 +119,10 @@ class TreeModel(QAbstractItemModel):
         item = subject.hemisphere[subject.hemisphere_type[0]]
         if not subject in self._data:
             for hemi in self._data:
-                if item in hemi.hemisphere[subject.hemisphere_type[0]].overlay_list:
+                if item in hemi.hemisphere[self._current_hemi_index].overlay_list:
                     break
-            if hemi.is_visible():
-                result |= Qt.ItemIsEnabled
+                if hemi.is_visible():
+                    result |= Qt.ItemIsEnabled
         else:
             result |= Qt.ItemIsEnabled
 
@@ -136,6 +139,7 @@ class TreeModel(QAbstractItemModel):
 
         subject = index.internalPointer()
         item = subject.hemisphere[subject.hemisphere_type[0]]
+
         if role == Qt.EditRole:
             value_str = value.toPyObject()
             if not value_str == '':
@@ -242,6 +246,37 @@ class TreeModel(QAbstractItemModel):
             self._current_index = index
         else:
             raise ValueError('Invalid value.')
+
+    def setCurrentHemiIndex(self, current_hemi_index):
+        """Set current hemisphere for display."""
+        #TODO
+        '''if current_hemi_index == 'Left':
+            self._current_hemi_index = 'lh'
+        elif current_hemi_index == 'Right':
+            self._current_hemi_index = 'rh'
+        elif current_hemi_index == 'Both':
+            self._current_hemi_index = 'both'
+        else:
+            raise ValueError('Invalid value.')
+        '''
+        self._current_hemi_index = current_hemi_index.lower()
+
+    def setCurrentSurfIndex(self, current_surf_index):
+        """Set current surf for display."""
+        self._current_surf_index = current_surf_index.lower()
+
+    def get_current_hemi_index(self):
+        return self._current_hemi_index
+
+    def get_current_surf_index(self):
+        return self._current_surf_index
+
+    def get_current_subject(self):
+        try:
+            subject = self._current_index.internalPointer()
+            return subject
+        except:
+            return None
 
     def is_hemisphere(self, index):
         """Check whether the `index` item is an instance of Hemisphere."""
