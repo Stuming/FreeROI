@@ -1009,6 +1009,7 @@ class Hemisphere(object):
             rgba_list.append(self.get_rgba(idx))
 
         # automatically add the background array
+        # TODO
         background = np.ones((len(self.surf['white'].x), 4)) * 127.5  # simulate the geometry_data color
         rgba_list.insert(0, background)
 

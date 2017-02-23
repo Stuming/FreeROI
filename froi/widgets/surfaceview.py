@@ -115,7 +115,10 @@ class SurfaceView(QWidget):
         subject = subject_list[0]
         hemisphere_index = self.surface_model.get_current_hemi_index()
 
-        if hemisphere_index == 'both':
+        # TODO
+        if not hemisphere_index:
+            hemisphere_list = subject.hemisphere_type
+        elif hemisphere_index == 'both':
             hemisphere_list = ['lh', 'rh']
         else:
             hemisphere_list = [hemisphere_index]
@@ -124,8 +127,11 @@ class SurfaceView(QWidget):
             hemisphere = subject.hemisphere[hemi_type]
             if hemisphere.is_visible():
                 # get geometry's information
-                surface_index = self.surface_model.get_current_surf_index()  # hemisphere.surface_type[0]
-                geo = hemisphere.surf[surface_index]  # should use var: surf_type
+                surf_type = self.surface_model.get_current_surf_index()  # hemisphere.surface_type[0]
+                if not surf_type:
+                    surf_type = hemisphere.surface_type[0]
+
+                geo = hemisphere.surf[surf_type]  # should use var: surf_type
                 hemi_coords = geo.get_coords()
                 hemi_faces = geo.get_faces()
                 hemi_nn = geo.get_nn()

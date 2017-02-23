@@ -38,7 +38,7 @@ class Subject(object):
         self.hemisphere_type = []
         self.surface_type = []
         self.visible = True
-        self._add_hemisphere(surf_path)
+        self.add_hemisphere(surf_path)
 
     def __add_hemi(self, surf_path, offset=None):
         """Add hemi data and related info."""
@@ -55,7 +55,7 @@ class Subject(object):
         if current_surf_type not in self.surface_type:
             self.surface_type.append(current_surf_type)
 
-    def _add_hemisphere(self, surf_path):
+    def add_hemisphere(self, surf_path):
         """Check whether 'surf_path' is a valid data path."""
         if not os.path.exists(surf_path):
             print 'Surf file does not exist!'
@@ -102,7 +102,7 @@ if __name__ == '__main__':
 
     print subject1.hemisphere
     print subject1.hemisphere_type.count('lh')
-    subject1._add_hemisphere(sub2)
+    subject1.add_hemisphere(sub2)
     print subject1.hemisphere
     subject1._del_hemi('lh')
     print subject1.hemisphere

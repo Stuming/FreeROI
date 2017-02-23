@@ -14,10 +14,10 @@ class TreeModel(QAbstractItemModel):
     # customized signals
     repaint_surface = pyqtSignal()
 
-    def __init__(self, hemisphere_list, parent=None):
+    def __init__(self, subject_list, parent=None):
         """Initialize an instance."""
         super(TreeModel, self).__init__(parent)
-        self._data = hemisphere_list
+        self._data = subject_list
 
         self._current_hemi_index = None
         self._current_surf_index = None
@@ -292,19 +292,30 @@ class TreeModel(QAbstractItemModel):
             return False
 
     def _add_item(self, index, source):
-        if not index.isValid():
+        if not index.isValid() and not self._data:
             add_item = Subject(source)
             ok = self.insertRow(index.row(), add_item, index)
 
         else:
-            parent = index.parent()
-            if not parent.isValid():
-                add_item = Subject(source)
-            else:
-                parent_item = parent.internalPointer()
-                parent_item.load_overlay(source)
-                add_item = None
-            ok = self.insertRow(index.row(), add_item, parent)
+            sourse_name = source.split('/')[-3]
+            for item in self._data:
+                # TODO
+                if sourse_name == item.get_name():
+                    item_index = self._data.index(item)
+                    self._data.remove(item)
+                    item.add_hemisphere(source)
+                    self._data.insert(item_index, item)
+                    ok = True
+
+            if not ok:
+                parent = index.parent()
+                if not parent.isValid():
+                    add_item = Subject(source)
+                else:
+                    parent_item = parent.internalPointer()
+                    parent_item.load_overlay(source)
+                    add_item = None
+                ok = self.insertRow(index.row(), add_item, parent)
 
         if ok:
             self.repaint_surface.emit()
